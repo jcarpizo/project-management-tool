@@ -45,14 +45,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (!$model->getKey()) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
-        });
+        static::creating(fn ($model) => $model->{$model->getKeyName()} ??= (string) Str::uuid());
     }
 }
