@@ -6,8 +6,10 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Http\Services\Project\ProjectServiceInterface;
+use App\Models\Project;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
@@ -20,26 +22,34 @@ class ProjectController extends Controller
 
     public function index(): AnonymousResourceCollection
     {
-        return ProjectResource::collection($this->projectService->getAll());
+        $projects = $this->projectService->getAll(Auth::user());
+        return ProjectResource::collection($projects);
     }
 
     public function show(string $id): ProjectResource
     {
-        return new ProjectResource($this->projectService->findProject($id));
+        $project = $this->projectService->findProject($id);
+        $this->authorize('view', $project); // Policy check
+        return new ProjectResource($project);
     }
 
     public function store(StoreProjectRequest $request): ProjectResource
     {
+        $this->authorize('create', Project::class); // Policy check
         return new ProjectResource($this->projectService->create($request->validated()));
     }
 
     public function update(UpdateProjectRequest $request, string $id): ProjectResource
     {
+        $project = $this->projectService->findProject($id);
+        $this->authorize('update', $project); // Policy check
         return new ProjectResource($this->projectService->update($id, $request->validated()));
     }
 
     public function destroy(string $id): Response
     {
+        $project = $this->projectService->findProject($id);
+        $this->authorize('delete', $project); // Policy check
         $this->projectService->delete($id);
         return response()->noContent();
     }

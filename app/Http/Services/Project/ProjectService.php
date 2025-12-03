@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class ProjectService implements ProjectServiceInterface
 {
-    public function getAll(): Collection
+    public function getAll($user): Collection
     {
-        return Project::with(['tasks' => function ($query) {$query->whereNull('deleted_at');
-        }, 'tasks.assignee'])->get();
+        return Project::with(['tasks.assignee', 'owner:id,name'])
+            ->when($user->role !== 'admin', fn($q) =>
+            $q->where('owner_id', $user->id)
+            )
+            ->get();
     }
 
     public function create(array $data): Project

@@ -23,6 +23,11 @@ class Task extends Model
         'updater_user_id',
     ];
 
+    protected $hidden = [
+        'assigned_to',
+        'updater_user_id',
+    ];
+
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);

@@ -8,6 +8,19 @@
     <div class="py-12" x-data="projectTaskCrud()" x-init="init()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            <!-- Error Messages -->
+            <template x-if="errors.length">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Errors:</strong>
+                    <ul class="mt-2 list-disc list-inside">
+                        <template x-for="error in errors" :key="error">
+                            <li x-text="error"></li>
+                        </template>
+                    </ul>
+                    <span @click="errors = []" class="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer">&times;</span>
+                </div>
+            </template>
+
             <!-- Project Form -->
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4" x-text="editProjectMode ? 'Edit Project' : 'New Project'"></h3>
@@ -38,9 +51,10 @@
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <h3 class="font-semibold text-lg" x-text="project.title"></h3>
-                            <p class="text-gray-500 text-sm" x-text="project.description"></p>
-                            <p class="text-gray-400 text-xs">Deadline: <span x-text="project.deadline ?? 'N/A'"></span></p>
-                            <p class="text-gray-400 text-xs">Owner: <span x-text="project.owner?.name ?? 'Unknown'"></span></p>
+                            <p class="text-gray-500 text-sm"><strong x-text="project.description"></strong></p>
+                            <p class="text-gray-400 text-xs">Deadline: <strong x-text="project.deadline ?? 'N/A'"></strong></p>
+                            <p class="text-gray-400 text-xs">Owner: <strong x-text="project.owner?.name ?? 'Unknown'"></strong></p>
+                            <p class="text-gray-400 text-xs">Progress: <strong x-text="project.progress + '%'"></strong></p>
                         </div>
                         <div class="space-x-2">
                             <button @click="project.showTasks = !project.showTasks" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-green-700">Manage Tasks</button>
@@ -72,7 +86,7 @@
                                     <input type="date" x-model="project.taskForm.due_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                                 </div>
                                 <div class="flex space-x-2">
-                                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" x-text="project.editTaskMode ? 'Update Task' : 'Create Task'"></button>
+                                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-green-700" x-text="project.editTaskMode ? 'Update Task' : 'Create Task'"></button>
                                     <button type="button" @click="resetTaskForm(project)" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400">Cancel</button>
                                 </div>
                             </form>
@@ -112,6 +126,7 @@
                 projects: [],
                 editProjectMode: false,
                 projectForm: { id: null, title: '', description: '', deadline: '' },
+                errors: [], // <-- array to hold all error messages
 
                 init() {
                     this.fetchProjects();
@@ -125,37 +140,46 @@
                     };
                 },
 
-                fetchProjects() {
-                    fetch('/api/v1/projects', { headers: this.getHeaders() })
-                        .then(res => res.json())
-                        .then(data => {
-                            this.projects = (data.data || []).map(p => ({
-                                ...p,
-                                tasks: Array.isArray(p.tasks) ? p.tasks : [],
-                                taskForm: { id: null, title: '', status: 'todo', due_date: '', assigned_to: null },
-                                editTaskMode: false,
-                                showTasks: false
-                            }));
-                        })
-                        .catch(err => console.error(err));
+                async fetchProjects() {
+                    try {
+                        const res = await fetch('/api/v1/projects', { headers: this.getHeaders() });
+                        if (!res.ok) throw await res.json();
+                        const data = await res.json();
+                        this.projects = (data.data || []).map(p => ({
+                            ...p,
+                            tasks: Array.isArray(p.tasks) ? p.tasks : [],
+                            taskForm: { id: null, title: '', status: 'todo', due_date: '', assigned_to: null },
+                            editTaskMode: false,
+                            showTasks: false,
+                            progress: p.tasks && p.tasks.length > 0
+                                ? Math.round((p.tasks.filter(t => t.status === 'done').length / p.tasks.length) * 100)
+                                : 0
+                        }));
+                        this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
                 },
 
                 /* Project CRUD */
-                saveProject() {
-                    const url = this.editProjectMode ? `/api/v1/projects/${this.projectForm.id}` : '/api/v1/projects';
-                    const method = this.editProjectMode ? 'PATCH' : 'POST';
+                async saveProject() {
+                    try {
+                        const url = this.editProjectMode ? `/api/v1/projects/${this.projectForm.id}` : '/api/v1/projects';
+                        const method = this.editProjectMode ? 'PATCH' : 'POST';
+                        const res = await fetch(url, {
+                            method,
+                            headers: this.getHeaders(),
+                            body: JSON.stringify(this.projectForm)
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw data;
 
-                    fetch(url, {
-                        method,
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(this.projectForm)
-                    })
-                        .then(res => res.json())
-                        .then(() => {
-                            this.resetProjectForm();
-                            this.fetchProjects();
-                        })
-                        .catch(err => console.error(err));
+                        this.resetProjectForm();
+                        this.fetchProjects();
+                        this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
                 },
 
                 editProject(project) {
@@ -163,11 +187,16 @@
                     this.projectForm = JSON.parse(JSON.stringify(project));
                 },
 
-                deleteProject(id) {
+                async deleteProject(id) {
                     if (!confirm('Are you sure you want to delete this project?')) return;
-                    fetch(`/api/v1/projects/${id}`, { method: 'DELETE', headers: this.getHeaders() })
-                        .then(() => this.fetchProjects())
-                        .catch(err => console.error(err));
+                    try {
+                        const res = await fetch(`/api/v1/projects/${id}`, { method: 'DELETE', headers: this.getHeaders() });
+                        if (!res.ok) throw await res.json();
+                        this.fetchProjects();
+                        this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
                 },
 
                 resetProjectForm() {
@@ -176,23 +205,26 @@
                 },
 
                 /* Task CRUD */
-                saveTask(project) {
-                    const taskForm = project.taskForm;
-                    taskForm.project_id = project.id;
-                    const url = taskForm.id ? `/api/v1/tasks/${taskForm.id}` : '/api/v1/tasks';
-                    const method = taskForm.id ? 'PUT' : 'POST';
+                async saveTask(project) {
+                    try {
+                        const taskForm = project.taskForm;
+                        taskForm.project_id = project.id;
+                        const url = taskForm.id ? `/api/v1/tasks/${taskForm.id}` : '/api/v1/tasks';
+                        const method = taskForm.id ? 'PUT' : 'POST';
+                        const res = await fetch(url, {
+                            method,
+                            headers: this.getHeaders(),
+                            body: JSON.stringify(taskForm)
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw data;
 
-                    fetch(url, {
-                        method,
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(taskForm)
-                    })
-                        .then(res => res.json())
-                        .then(() => {
-                            this.resetTaskForm(project);
-                            this.fetchProjects();
-                        })
-                        .catch(err => console.error(err));
+                        this.resetTaskForm(project);
+                        this.fetchProjects();
+                        this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
                 },
 
                 editTask(task, project) {
@@ -207,11 +239,16 @@
                     project.showTasks = true;
                 },
 
-                deleteTask(task_id) {
+                async deleteTask(task_id) {
                     if (!confirm('Are you sure you want to delete this task?')) return;
-                    fetch(`/api/v1/tasks/${task_id}`, { method: 'DELETE', headers: this.getHeaders() })
-                        .then(() => this.fetchProjects())
-                        .catch(err => console.error(err));
+                    try {
+                        const res = await fetch(`/api/v1/tasks/${task_id}`, { method: 'DELETE', headers: this.getHeaders() });
+                        if (!res.ok) throw await res.json();
+                        this.fetchProjects();
+                        this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
                 },
 
                 resetTaskForm(project) {
