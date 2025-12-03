@@ -16,10 +16,9 @@ return new class extends Migration
             $table->uuid('project_id');
             $table->string('title');
             $table->enum('status', ['todo', 'in_progress', 'done'])->default('todo');
-            $table->uuid('assigned_to');
             $table->date('due_date')->nullable();
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
+            $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
