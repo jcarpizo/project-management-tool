@@ -6,17 +6,19 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateTaskRequest extends BaseRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'updater_user_id' => auth()->id(),
+        ]);
+    }
+
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
@@ -27,6 +29,7 @@ class UpdateTaskRequest extends BaseRequest
             'status' => 'sometimes|' . $this->rulesStatus(),
             'due_date' => $this->rulesFutureDate(),
             'assigned_to' => $this->rulesOptionalUuid() . '|exists:users,id',
+            'updater_user_id' => ['sometimes', 'uuid', 'exists:users,id'],
         ];
     }
 }
