@@ -9,12 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class ProjectService implements ProjectServiceInterface
 {
-    /**
-     * Retrieve all projects.
-     */
     public function getAll(): Collection
     {
-        return Project::all();
+        return Project::with(['tasks' => function ($query) {$query->whereNull('deleted_at');
+        }, 'tasks.assignee'])->get();
     }
 
     public function create(array $data): Project
