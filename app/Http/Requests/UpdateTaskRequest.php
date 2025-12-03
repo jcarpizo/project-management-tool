@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTaskRequest extends BaseRequest
 {
@@ -24,7 +23,7 @@ class UpdateTaskRequest extends BaseRequest
     {
         return [
             'project_id' => 'sometimes|' . $this->rulesUuid() . '|exists:projects,id',
-            'title' => $this->rulesOptionalTitle(),
+            'title' => $this->rulesUniqueTitle('tasks', 'title', $this->route('task')),
             'status' => 'sometimes|' . $this->rulesStatus(),
             'due_date' => $this->rulesFutureDate(),
             'assigned_to' => $this->rulesOptionalUuid() . '|exists:users,id',

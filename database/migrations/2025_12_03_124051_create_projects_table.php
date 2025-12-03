@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->date('deadline')->nullable();
             $table->uuid('owner_id');
-            $table->foreignUuid('updater_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('updater_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');

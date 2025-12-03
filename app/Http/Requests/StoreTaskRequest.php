@@ -24,7 +24,7 @@ class StoreTaskRequest extends BaseRequest
     {
         return [
             'project_id' => $this->rulesUuid() . '|exists:projects,id',
-            'title' => $this->rulesTitle(),
+            'title' => $this->rulesUniqueTitle('tasks'),
             'status' => $this->rulesStatus(),
             'due_date' => $this->rulesFutureDate(),
             'assigned_to' => $this->rulesOptionalUuid() . '|exists:users,id',

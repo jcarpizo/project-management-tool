@@ -24,7 +24,7 @@ class TaskService implements TaskServiceInterface
      */
     public function update(string $id, array $data): ?Task
     {
-        $task = $this->findTaskOrFail($id);
+        $task = $this->findTask($id);
         DB::transaction(fn() => $task->update($data));
         return $task->fresh();
     }
@@ -34,11 +34,11 @@ class TaskService implements TaskServiceInterface
      */
     public function delete(string $id): bool
     {
-        return DB::transaction(fn() => $this->findTaskOrFail($id)?->delete() ?? false);
+        return DB::transaction(fn() => $this->findTask($id)?->delete() ?? false);
     }
 
-    public function findTaskOrFail(string $id): ?Task
+    public function findTask(string $id): ?Task
     {
-        return Task::findOrFail($id);
+        return Task::find($id);
     }
 }

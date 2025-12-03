@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 interface TaskServiceInterface
 {
     public function getAll(): Collection;
-    public function findTaskOrFail(string $id): ?Task;
+    public function findTask(string $id): ?Task;
     public function create(array $data): Task;
     public function update(string $id, array $data): ?Task;
     public function delete(string $id): bool;

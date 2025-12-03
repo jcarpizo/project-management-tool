@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProjectRequest;
-use App\Http\Requests\UpdateProjectRequest;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Services\Task\TaskService;
 use App\Http\Services\Task\TaskServiceInterface;
@@ -26,15 +26,15 @@ class TaskController extends Controller
 
     public function show(string $id): TaskResource
     {
-        return new TaskResource($this->taskService->findTaskOrFail($id));
+        return new TaskResource($this->taskService->findTask($id));
     }
 
-    public function store(StoreProjectRequest $request): TaskResource
+    public function store(StoreTaskRequest $request): TaskResource
     {
         return new TaskResource($this->taskService->create($request->validated()));
     }
 
-    public function update(UpdateProjectRequest $request, string $id): TaskResource
+    public function update(UpdateTaskRequest $request, string $id): TaskResource
     {
         return new TaskResource($this->taskService->update($id, $request->validated()));
     }

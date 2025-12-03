@@ -16,16 +16,6 @@ abstract class BaseRequest extends FormRequest
         return 'nullable|uuid';
     }
 
-    protected function rulesTitle(): string
-    {
-        return 'required|string|max:255';
-    }
-
-    protected function rulesOptionalTitle(): string
-    {
-        return 'sometimes|string|max:255';
-    }
-
     protected function rulesFutureDate(): string
     {
         return 'nullable|date|after_or_equal:today';

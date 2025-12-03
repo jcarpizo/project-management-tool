@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('project_id');
-            $table->string('title');
+            $table->string('title')->unique();
             $table->enum('status', ['todo', 'in_progress', 'done'])->default('todo');
             $table->date('due_date')->nullable();
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignUuid('updater_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('updater_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
