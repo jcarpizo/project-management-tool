@@ -9,6 +9,10 @@ mysql  Ver 8.0.44-0ubuntu0.24.04.1
 
 NodeJs v24.11.1 / NPM 11.6.2
 
+Alpinejs v3.4.2
+
+Tailwindcss forms v0.5.2
+
 ## Project Setup
 
 Clone the repository: `git clone git@github.com:jcarpizo/project-management-tool.git`
