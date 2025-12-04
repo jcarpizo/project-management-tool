@@ -4,43 +4,57 @@ namespace App\Services\Project;
 
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
+use Throwable;
 
 class ProjectService implements ProjectServiceInterface
 {
     public function getAll($user): Collection
     {
         return Project::with(['tasks.assignee', 'owner:id,name'])
-            ->when($user->role !== 'admin', fn($q) =>
-            $q->where('owner_id', $user->id)
-            )
+            ->when($user->role !== 'admin', fn($q) => $q->where('owner_id', $user->id))
             ->get();
     }
 
     public function create(array $data): Project
     {
-        return DB::transaction(fn() => Project::create($data));
+        try {
+            return DB::transaction(fn() => Project::create($data));
+        } catch (Throwable $e) {
+            report($e);
+            throw new RuntimeException('Failed to create project.');
+        }
     }
 
-    /**
-     * @throws ModelNotFoundException
-     */
-    public function update(string $id, array $data): ?Project
+    public function update(string $id, array $data): Project
     {
-        return DB::transaction(fn() => $this->findProject($id)?->update($data) ? $this->findProject($id) : null);
+        $project = $this->findProject($id);
+
+        try {
+            DB::transaction(fn() => $project->update($data));
+        } catch (Throwable $e) {
+            report($e);
+            throw new RuntimeException('Failed to update project.');
+        }
+
+        return $this->findProject($id);
     }
 
-    /**
-     * @throws ModelNotFoundException
-     */
     public function delete(string $id): bool
     {
-        return DB::transaction(fn() => $this->findProject($id)?->delete() ?? false);
+        $project = $this->findProject($id);
+
+        try {
+            return DB::transaction(fn() => $project->delete());
+        } catch (Throwable $e) {
+            report($e);
+            throw new RuntimeException('Failed to delete project.');
+        }
     }
 
-    public function findProject(string $id): ?Project
+    public function findProject(string $id): Project
     {
-        return Project::find($id);
+        return Project::findOrFail($id);
     }
 }

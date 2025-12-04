@@ -4,8 +4,8 @@ namespace App\Services\Task;
 
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class TaskService implements TaskServiceInterface
 {
@@ -16,29 +16,42 @@ class TaskService implements TaskServiceInterface
 
     public function create(array $data): Task
     {
-        return DB::transaction(fn() => Task::create($data));
+        try {
+            return DB::transaction(fn() => Task::create($data));
+        } catch (Throwable $e) {
+            report($e);
+            throw new \RuntimeException('Failed to create task.');
+        }
     }
 
-    /**
-     * @throws ModelNotFoundException
-     */
-    public function update(string $id, array $data): ?Task
+    public function update(string $id, array $data): Task
     {
         $task = $this->findTask($id);
-        DB::transaction(fn() => $task->update($data));
+
+        try {
+            DB::transaction(fn() => $task->update($data));
+        } catch (Throwable $e) {
+            report($e);
+            throw new \RuntimeException('Failed to update task.');
+        }
+
         return $task->fresh();
     }
 
-    /**
-     * @throws ModelNotFoundException
-     */
     public function delete(string $id): bool
     {
-        return DB::transaction(fn() => $this->findTask($id)?->delete() ?? false);
+        $task = $this->findTask($id);
+
+        try {
+            return DB::transaction(fn() => $task->delete());
+        } catch (Throwable $e) {
+            report($e);
+            throw new \RuntimeException('Failed to delete task.');
+        }
     }
 
-    public function findTask(string $id): ?Task
+    public function findTask(string $id): Task
     {
-        return Task::find($id);
+        return Task::findOrFail($id);
     }
 }

@@ -1,12 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('Project Management Tool') }}
         </h2>
     </x-slot>
 
     <div class="py-12" x-data="projectTaskCrud()" x-init="init()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Current User Info -->
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
+                <p class="text-gray-700">Logged in as: <strong>{{ auth()->user()->name }}</strong></p>
+                <p class="text-gray-700">Role: <strong>{{ auth()->user()->role }}</strong></p>
+            </div>
 
             <!-- Error Messages -->
             <template x-if="errors.length">
@@ -115,7 +121,6 @@
         </div>
     </div>
 
-    <!-- Pass token from Blade -->
     <script>
         const API_TOKEN = "{{ auth()->user()->currentAccessToken()?->plainTextToken ?? auth()->user()->createToken('api-token')->plainTextToken }}";
     </script>
@@ -126,7 +131,7 @@
                 projects: [],
                 editProjectMode: false,
                 projectForm: { id: null, title: '', description: '', deadline: '' },
-                errors: [], // <-- array to hold all error messages
+                errors: [],
 
                 init() {
                     this.fetchProjects();
@@ -161,7 +166,6 @@
                     }
                 },
 
-                /* Project CRUD */
                 async saveProject() {
                     try {
                         const url = this.editProjectMode ? `/api/v1/projects/${this.projectForm.id}` : '/api/v1/projects';
@@ -204,7 +208,6 @@
                     this.projectForm = { id: null, title: '', description: '', deadline: '' };
                 },
 
-                /* Task CRUD */
                 async saveTask(project) {
                     try {
                         const taskForm = project.taskForm;
