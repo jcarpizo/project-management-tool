@@ -69,3 +69,21 @@ Run this command line: `php artisan test`
 Laravel Breeze;
 Laravel Sanctum;
 Audit Logs: Using Observer Pattern;
+
+## Screenshots
+Admin:
+
+![Alt text](https://github.com/jcarpizo/project-management-tool/blob/master/screenshot/admin.png)
+
+User:
+
+![Alt text](https://github.com/jcarpizo/project-management-tool/blob/master/screenshot/user.png)
+
+Audit Logs: (Note: Need to fix the UI)
+
+![Alt text](https://github.com/jcarpizo/project-management-tool/blob/master/screenshot/logs.png)
+
+PHP Test Cases:
+
+![Alt text](https://github.com/jcarpizo/project-management-tool/blob/master/screenshot/test.png)
+
