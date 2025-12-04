@@ -2,7 +2,4 @@
 
 namespace App\Observers;
 
-class TaskObserver extends ActivityObserver
-{
-
-}
+class TaskObserver extends ActivityObserver {}

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Providers;
 
@@ -10,6 +10,8 @@ use App\Services\Project\ProjectService;
 use App\Services\Project\ProjectServiceInterface;
 use App\Services\Task\TaskService;
 use App\Services\Task\TaskServiceInterface;
+use App\Services\User\UserService;
+use App\Services\User\UserServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ProjectServiceInterface::class, ProjectService::class);
         $this->app->bind(TaskServiceInterface::class, TaskService::class);
+        $this->app->bind(UserServiceInterface::class, UserService::class);
     }
 
     /**

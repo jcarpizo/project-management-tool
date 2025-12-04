@@ -91,6 +91,19 @@
                                     <label class="block text-gray-700">Due Date</label>
                                     <input type="date" x-model="project.taskForm.due_date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                                 </div>
+
+                                <!-- Admin Only: Assignee Dropdown -->
+                                <div class="mb-2" x-show="currentUserRole === 'admin'">
+                                    <label class="block text-gray-700">Assign To</label>
+                                    <select x-model="project.taskForm.assignee_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                        <option value="">-- Select User --</option>
+                                        <template x-for="user in users" :key="user.id">
+                                            <option :value="user.id" x-text="user.name"></option>
+                                        </template>
+                                    </select>
+                                    <span>&nbsp;</span>
+                                </div>
+
                                 <div class="flex space-x-2">
                                     <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-green-700" x-text="project.editTaskMode ? 'Update Task' : 'Create Task'"></button>
                                     <button type="button" @click="resetTaskForm(project)" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400">Cancel</button>
@@ -106,7 +119,7 @@
                                         <p class="font-medium" x-text="task.title"></p>
                                         <p class="text-gray-500 text-sm">Status: <span x-text="task.status"></span></p>
                                         <p class="text-gray-400 text-xs">Due: <span x-text="task.due_date ?? 'N/A'"></span></p>
-                                        <p class="text-gray-400 text-xs">Assigned: <span x-text="task.assignee_id_user?.name ?? 'N/A'"></span></p>
+                                        <p class="text-gray-400 text-xs">Assigned: <span x-text="task.assignee?.name ?? 'N/A'"></span></p>
                                     </div>
                                     <div class="space-x-2">
                                         <button @click="editTask(task, project)" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-yellow-600">Edit</button>
@@ -132,9 +145,12 @@
                 editProjectMode: false,
                 projectForm: { id: null, title: '', description: '', deadline: '' },
                 errors: [],
+                users: [],
+                currentUserRole: "{{ auth()->user()->role }}",
 
                 init() {
                     this.fetchProjects();
+                    this.fetchUsers();
                 },
 
                 getHeaders() {
@@ -161,6 +177,17 @@
                                 : 0
                         }));
                         this.errors = [];
+                    } catch (err) {
+                        this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
+                    }
+                },
+
+                async fetchUsers() {
+                    try {
+                        const res = await fetch('/api/v1/users', { headers: this.getHeaders() });
+                        if (!res.ok) throw await res.json();
+                        const data = await res.json();
+                        this.users = data.data || [];
                     } catch (err) {
                         this.errors = Array.isArray(err.errors) ? Object.values(err.errors).flat() : [err.message || 'Unknown error'];
                     }
@@ -212,6 +239,12 @@
                     try {
                         const taskForm = project.taskForm;
                         taskForm.project_id = project.id;
+
+                        if(this.currentUserRole === 'admin' && !taskForm.assignee_id) {
+                            this.errors = ['Please assign a user to the task'];
+                            return;
+                        }
+
                         const url = taskForm.id ? `/api/v1/tasks/${taskForm.id}` : '/api/v1/tasks';
                         const method = taskForm.id ? 'PUT' : 'POST';
                         const res = await fetch(url, {

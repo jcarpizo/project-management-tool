@@ -13,7 +13,11 @@ class ProjectService implements ProjectServiceInterface
     public function getAll($user): Collection
     {
         return Project::with(['tasks.assignee', 'owner:id,name'])
-            ->when($user->role !== 'admin', fn($q) => $q->where('owner_id', $user->id))
+            ->when($user->role !== 'admin', function ($q) use ($user) {
+                $q->whereHas('tasks', fn($t) =>
+                $t->where('assignee_id', $user->id)
+                );
+            })
             ->get();
     }
 
