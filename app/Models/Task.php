@@ -19,12 +19,12 @@ class Task extends Model
         'title',
         'status',
         'due_date',
-        'assigned_to',
+        'assignee_id',
         'updater_user_id',
     ];
 
     protected $hidden = [
-        'assigned_to',
+        'assignee_id',
         'updater_user_id',
     ];
 
@@ -35,7 +35,7 @@ class Task extends Model
 
     public function assignee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(User::class, 'assignee_id');
     }
 
     protected static function booted(): void

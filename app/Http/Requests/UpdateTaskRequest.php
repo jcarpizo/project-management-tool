@@ -23,7 +23,7 @@ class UpdateTaskRequest extends BaseRequest
             'title' => $this->rulesUniqueTitle('tasks', 'title', $this->route('task')),
             'status' => 'sometimes|' . $this->rulesStatus(),
             'due_date' => $this->rulesFutureDate(),
-            'assigned_to' => $this->rulesOptionalUuid() . '|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id',
             'updater_user_id' => ['sometimes', 'uuid', 'exists:users,id'],
         ];
     }

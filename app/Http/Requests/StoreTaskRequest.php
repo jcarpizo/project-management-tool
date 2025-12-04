@@ -9,7 +9,7 @@ class StoreTaskRequest extends BaseRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'assigned_to' => auth()->id(),
+            'assignee_id' => auth()->id(),
         ]);
     }
 
@@ -23,7 +23,7 @@ class StoreTaskRequest extends BaseRequest
             'title' => $this->rulesUniqueTitle('tasks'),
             'status' => $this->rulesStatus(),
             'due_date' => $this->rulesFutureDate(),
-            'assigned_to' => $this->rulesOptionalUuid() . '|exists:users,id',
+            'assignee_id' => 'nullable|exists:users,id',
         ];
     }
 }

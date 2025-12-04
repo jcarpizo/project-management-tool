@@ -100,7 +100,7 @@
                                         <p class="font-medium" x-text="task.title"></p>
                                         <p class="text-gray-500 text-sm">Status: <span x-text="task.status"></span></p>
                                         <p class="text-gray-400 text-xs">Due: <span x-text="task.due_date ?? 'N/A'"></span></p>
-                                        <p class="text-gray-400 text-xs">Assigned: <span x-text="task.assigned_to_user?.name ?? 'N/A'"></span></p>
+                                        <p class="text-gray-400 text-xs">Assigned: <span x-text="task.assignee_id_user?.name ?? 'N/A'"></span></p>
                                     </div>
                                     <div class="space-x-2">
                                         <button @click="editTask(task, project)" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-yellow-600">Edit</button>
@@ -148,7 +148,7 @@
                         this.projects = (data.data || []).map(p => ({
                             ...p,
                             tasks: Array.isArray(p.tasks) ? p.tasks : [],
-                            taskForm: { id: null, title: '', status: 'todo', due_date: '', assigned_to: null },
+                            taskForm: { id: null, title: '', status: 'todo', due_date: '', assignee_id: null },
                             editTaskMode: false,
                             showTasks: false,
                             progress: p.tasks && p.tasks.length > 0
@@ -234,7 +234,7 @@
                         title: task.title ?? '',
                         status: task.status ?? 'todo',
                         due_date: task.due_date ?? '',
-                        assigned_to: task.assigned_to ?? null
+                        assignee_id: task.assignee_id ?? null
                     };
                     project.showTasks = true;
                 },
@@ -253,7 +253,7 @@
 
                 resetTaskForm(project) {
                     project.editTaskMode = false;
-                    project.taskForm = { id: null, title: '', status: 'todo', due_date: '', assigned_to: null };
+                    project.taskForm = { id: null, title: '', status: 'todo', due_date: '', assignee_id: null };
                 }
             }
         }

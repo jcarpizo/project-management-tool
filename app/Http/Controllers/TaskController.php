@@ -26,7 +26,9 @@ class TaskController extends Controller
 
     public function show(string $id): TaskResource
     {
-        return new TaskResource($this->taskService->findTask($id));
+        $task = $this->taskService->findTask($id);
+        $this->authorize('view', $task); // Policy check
+        return new TaskResource($task);
     }
 
     public function store(StoreTaskRequest $request): TaskResource
@@ -36,11 +38,15 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, string $id): TaskResource
     {
+        $task = $this->taskService->findTask($id);
+        $this->authorize('update', $task); // Policy check
         return new TaskResource($this->taskService->update($id, $request->validated()));
     }
 
     public function destroy(string $id): Response
     {
+        $task = $this->taskService->findTask($id);
+        $this->authorize('delete', $task); // Policy check
         $this->taskService->delete($id);
         return response()->noContent();
     }
