@@ -8,6 +8,14 @@
     <div class="py-12" x-data="projectTaskCrud()" x-init="init()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            @if(auth()->user()->role === 'admin')
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
+                <a href="{{ route('activitylogs') }}">
+                    View Activity Logs
+                </a>
+            </div>
+            @endif
+
             <!-- Current User Info -->
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
                 <p class="text-gray-700">Logged in as: <strong>{{ auth()->user()->name }}</strong></p>

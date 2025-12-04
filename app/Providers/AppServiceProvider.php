@@ -6,6 +6,8 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Observers\ProjectObserver;
 use App\Observers\TaskObserver;
+use App\Services\AuditLog\AuditLogService;
+use App\Services\AuditLog\AuditLogServiceInterface;
 use App\Services\Project\ProjectService;
 use App\Services\Project\ProjectServiceInterface;
 use App\Services\Task\TaskService;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProjectServiceInterface::class, ProjectService::class);
         $this->app->bind(TaskServiceInterface::class, TaskService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
+        $this->app->bind(AuditLogServiceInterface::class, AuditLogService::class);
     }
 
     /**
