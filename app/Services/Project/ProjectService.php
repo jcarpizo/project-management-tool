@@ -1,6 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Http\Services\Project;
+namespace App\Services\Project;
 
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Collection;

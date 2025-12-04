@@ -1,6 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Http\Services\Task;
+namespace App\Services\Task;
 
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;

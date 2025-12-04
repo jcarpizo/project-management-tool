@@ -1,8 +1,5 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Observers;
 
-class ProjectObserver extends ActivityObserver
-{
-
-}
+class ProjectObserver extends ActivityObserver {}

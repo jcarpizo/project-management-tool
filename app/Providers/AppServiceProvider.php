@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use App\Http\Services\Project\ProjectService;
-use App\Http\Services\Project\ProjectServiceInterface;
-use App\Http\Services\Task\TaskService;
-use App\Http\Services\Task\TaskServiceInterface;
 use App\Models\Project;
 use App\Models\Task;
 use App\Observers\ProjectObserver;
 use App\Observers\TaskObserver;
+use App\Services\Project\ProjectService;
+use App\Services\Project\ProjectServiceInterface;
+use App\Services\Task\TaskService;
+use App\Services\Task\TaskServiceInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

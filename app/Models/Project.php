@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Models;
 
@@ -28,6 +28,10 @@ class Project extends Model
         'updater_user_id',
     ];
 
+    protected $casts = [
+        'deadline' => 'datetime',
+    ];
+
     protected $appends = ['progress'];
 
     public function tasks(): HasMany
@@ -53,5 +57,10 @@ class Project extends Model
             if ($total === 0) return 0;
             return round($tasks->where('status', 'done')->count() / $total * 100);
         });
+    }
+
+    public function scopeUpcomingDeadline($query, $days = 1)
+    {
+        return $query->whereDate('deadline', now()->addDays($days));
     }
 }
